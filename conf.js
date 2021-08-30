@@ -26,17 +26,17 @@ conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 conf.sim = 'disable'; // enable / disable
 
 // build cse
-cse.host        = '203.253.128.161';
+cse.host        = '13.124.165.14';
 cse.port        = '7579';
 cse.name        = 'Mobius';
-cse.id          = '/Mobius2';
-cse.mqttport    = '1883';
+cse.id          = '/Mobius';
+cse.mqttport    = '7578';
 cse.wsport      = '7577';
 
 // build ae
-ae.name         = 'IYAHN_DEMO';
+ae.name         = 'personal_storage';
 
-ae.id           = 'S'+ae.name;
+ae.id           = 'SLbV2kPyrjZ';
 
 ae.parent       = '/' + cse.name;
 ae.appid        = 'measure_co2';
@@ -96,7 +96,7 @@ acp.id = ae.id;
 conf.usesecure  = 'disable';
 
 if(conf.usesecure === 'enable') {
-    cse.mqttport = '8883';
+    cse.mqttport = '20517';
 }
 
 conf.cse = cse;

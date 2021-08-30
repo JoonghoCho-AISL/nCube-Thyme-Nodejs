@@ -1,3 +1,4 @@
+ 
 /**
  * Created by Il Yeup, Ahn in KETI on 2017-02-25.
  */
@@ -50,16 +51,21 @@ exports.ready_for_tas = function ready_for_tas () {
 function thyme_tas_handler (data) {
     // 'this' refers to the socket calling this callback.
     tas_buffer[this.id] += data.toString();
-    //console.log(tas_buffer[this.id]);
-    var data_arr = tas_buffer[this.id].split('<EOF>');
-    if(data_arr.length >= 2) {
+    console.log(tas_buffer[this.id]);
+    tas_buffer[this.id] = tas_buffer[this.id].replace('[', '').replace(']','').replace('},', '}')
+    console.log(tas_buffer[this.id])
+    var data_arr = tas_buffer[this.id].split('"\\t"');
+    console.log(data_arr)
+    console.log(data_arr.length)
+    if(data_arr.length >=2) {
         for (var i = 0; i < data_arr.length-1; i++) {
             var line = data_arr[i];
+            console.log(line);
             tas_buffer[this.id] = tas_buffer[this.id].replace(line+'<EOF>', '');
             var jsonObj = JSON.parse(line);
+            console.log(jsonObj)
             var ctname = jsonObj.ctname;
             var content = jsonObj.con;
-
             socket_arr[ctname] = this;
 
             console.log('----> got data for [' + ctname + '] from tas ---->');
@@ -71,7 +77,7 @@ function thyme_tas_handler (data) {
                 if (sh_state == 'crtci') {
                     for (var j = 0; j < conf.cnt.length; j++) {
                         if (conf.cnt[j].name == ctname) {
-                            //console.log(line);
+                            console.log(line);
                             var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
                             sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
                                 try {
@@ -79,7 +85,8 @@ function thyme_tas_handler (data) {
                                     var ctname = to_arr[to_arr.length - 1];
                                     var result = {};
                                     result.ctname = ctname;
-                                    result.con = status;
+                                    // result.con = status;
+                                    result.con = content;
 
                                     console.log('<---- x-m2m-rsc : ' + status + ' <----');
                                     if (status == 5106 || status == 2001 || status == 4105) {
@@ -108,4 +115,3 @@ function thyme_tas_handler (data) {
         }
     }
 }
-
