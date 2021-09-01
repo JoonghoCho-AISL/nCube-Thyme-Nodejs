@@ -1,4 +1,3 @@
- 
 /**
  * Created by Il Yeup, Ahn in KETI on 2017-02-25.
  */
@@ -16,15 +15,30 @@
 // for TAS
 var net = require('net');
 var ip = require('ip');
+const Onem2mClient = require('./onem2m_client');
 
 global.socket_arr = {};
 
 var tas_buffer = {};
 exports.buffer = tas_buffer;
 
+var options = {
+    protocol: conf.useprotocol,
+    host: conf.cse.host,
+    port: conf.cse.port,
+    mqttport: conf.cse.mqttport,
+    wsport: conf.cse.wsport,
+    cseid: conf.cse.id,
+    aei: conf.ae.id,
+    aeport: conf.ae.port,
+    bodytype: conf.ae.bodytype,
+    usesecure: conf.usesecure,
+};
 
-var _server = null;
+var onem2m_client = new Onem2mClient(options);
+
 exports.ready_for_tas = function ready_for_tas () {
+    var _server = null;
     if(_server == null) {
         _server = net.createServer(function (socket) {
             console.log('socket connected');
@@ -48,24 +62,24 @@ exports.ready_for_tas = function ready_for_tas () {
     }
 };
 
+
 function thyme_tas_handler (data) {
     // 'this' refers to the socket calling this callback.
     tas_buffer[this.id] += data.toString();
     console.log(tas_buffer[this.id]);
-    tas_buffer[this.id] = tas_buffer[this.id].replace('[', '').replace(']','').replace('},', '}')
-    console.log(tas_buffer[this.id])
-    var data_arr = tas_buffer[this.id].split('"\\t"');
+    var data_arr = tas_buffer[this.id].split('<EOF>');
     console.log(data_arr)
     console.log(data_arr.length)
-    if(data_arr.length >=2) {
+    if(data_arr.length >= 2) {
         for (var i = 0; i < data_arr.length-1; i++) {
             var line = data_arr[i];
-            console.log(line);
             tas_buffer[this.id] = tas_buffer[this.id].replace(line+'<EOF>', '');
             var jsonObj = JSON.parse(line);
-            console.log(jsonObj)
             var ctname = jsonObj.ctname;
+            console.log(jsonObj);
+            console.log(ctname);
             var content = jsonObj.con;
+            console.log(content)
             socket_arr[ctname] = this;
 
             console.log('----> got data for [' + ctname + '] from tas ---->');
@@ -79,14 +93,14 @@ function thyme_tas_handler (data) {
                         if (conf.cnt[j].name == ctname) {
                             console.log(line);
                             var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
-                            sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
+                            console.log(parent);
+                            onem2m_client.create_cin(parent, j, content, this, function (status, res_body, to, socket) {
                                 try {
                                     var to_arr = to.split('/');
                                     var ctname = to_arr[to_arr.length - 1];
                                     var result = {};
                                     result.ctname = ctname;
-                                    // result.con = status;
-                                    result.con = content;
+                                    result.con = status;
 
                                     console.log('<---- x-m2m-rsc : ' + status + ' <----');
                                     if (status == 5106 || status == 2001 || status == 4105) {
@@ -115,3 +129,4 @@ function thyme_tas_handler (data) {
         }
     }
 }
+

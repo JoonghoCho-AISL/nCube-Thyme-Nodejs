@@ -12,6 +12,7 @@
  * Created by ryeubi on 2015-08-31.
  */
 
+const { Console } = require('console');
 var Onem2mClient = require('./onem2m_client');
 
 var thyme_tas = require('./thyme_tas');
@@ -220,13 +221,13 @@ function setup_resources(_status) {
 
 onem2m_client.on('notification', function (source_uri, cinObj) {
 
-    console.log(source_uri, cinObj);
+    console.log(source_uri, cinObj+'here');
 
     var path_arr = source_uri.split('/')
     var event_cnt_name = path_arr[path_arr.length-2];
     var content = cinObj.con;
 
-    if(event_cnt_name === 'co2') {
+    if(event_cnt_name === 'Servo_motor') {
         // send to tas
         if (socket_arr[path_arr[path_arr.length-2]] != null) {
             socket_arr[path_arr[path_arr.length-2]].write(JSON.stringify(content) + '<EOF>');
@@ -235,7 +236,7 @@ onem2m_client.on('notification', function (source_uri, cinObj) {
 });
 
 var t_count = 0;
-function timer_upload_action(cnt_idx, content, period) {
+function timer_upload_action(cnt_idx, content, period) { //데이터 전송부
     if (sh_state == 'crtci') {
         var parent = conf.cnt[cnt_idx].parent + '/' + conf.cnt[cnt_idx].name;
         onem2m_client.create_cin(parent, cnt_idx, content, this, function (status, res_body, to, socket) {
@@ -249,9 +250,23 @@ function timer_upload_action(cnt_idx, content, period) {
     }
 }
 
+
+
 function timer_upload(period, cnt_idx) {
-    var content = JSON.stringify({value: 'TAS' + t_count++});
-    setTimeout(timer_upload_action, period, cnt_idx, content, period);
+    const Tas_data=[];
+    var content = 0;
+    const spawn = require('child_process').spawn;
+    const result = spawn('python',['flow.py']);
+
+    result.stdout.on('data',function (data){
+        Tas_data.push(parseFloat(data));
+        content = JSON.stringify({"value" : Tas_data});
+        console.log(Tas_data);
+        console.log(content);
+        setTimeout(timer_upload_action, period, cnt_idx, content, period);
+    })
+    console.log(content);
+    //setTimeout(timer_upload_action, period, cnt_idx, content, period);
 }
 
 

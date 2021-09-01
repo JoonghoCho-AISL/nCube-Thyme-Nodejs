@@ -1960,7 +1960,7 @@ var parse_sgn = function (rqi, pc, callback) {
         var sgnObj = {};
         var cinObj = {};
         sgnObj = pc['sgn'] != null ? pc['sgn'] : pc['singleNotification'];
-
+        console.log(sgnObj)
         if (nmtype === 'long') {
             console.log('oneM2M spec. define only short name for resource')
         }
@@ -2232,7 +2232,7 @@ app.post('/:resourcename0', onem2mParser, function(request, response) {
     request.on('end', function () {
         request.body = fullBody;
 
-        //console.log(fullBody);
+        console.log(fullBody);
 
         var content_type = request.headers['content-type'];
         if (content_type.includes('xml')) {

@@ -30,16 +30,14 @@ cse.host        = '13.124.165.14';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius';
-cse.mqttport    = '7578';
+cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
 // build ae
-ae.name         = 'personal_storage';
-
-ae.id           = 'SLbV2kPyrjZ';
-
+ae.name         = 'self_storage';
+ae.id           = 'S'+ ae.name;
 ae.parent       = '/' + cse.name;
-ae.appid        = 'measure_co2';
+ae.appid        = 'self_storage';
 ae.port         = '9727';
 ae.bodytype     = 'json'; // select 'json' or 'xml' or 'cbor'
 ae.tasport      = '3105';
@@ -48,20 +46,20 @@ ae.tasport      = '3105';
 var count = 0;
 cnt_arr[count] = {};
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'tvoc';
+cnt_arr[count++].name = 'current_position';
 cnt_arr[count] = {};
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'co2';
-cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'temp';
-cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'led';
+cnt_arr[count++].name = 'target_position';
+// cnt_arr[count] = {};
+// cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
+// cnt_arr[count++].name = 'temp';
+// cnt_arr[count] = {};
+// cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
+// cnt_arr[count++].name = 'led';
 
-//cnt_arr[count] = {};
-//cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-//cnt_arr[count++].name = 'timer';
+// cnt_arr[count] = {};
+// cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
+// cnt_arr[count++].name = 'timer';
 
 
 
@@ -70,9 +68,15 @@ cnt_arr[count++].name = 'led';
 // build sub
 count = 0;
 sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[3].name;
+sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name;
 sub_arr[count].name = 'sub';
-//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype; // mqtt
+// sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype; // mqtt
+sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
+count = 0;
+sub_arr[count] = {};
+sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
+sub_arr[count].name = 'sub';
+// sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype; // mqtt
 sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
 
 // --------
@@ -96,7 +100,7 @@ acp.id = ae.id;
 conf.usesecure  = 'disable';
 
 if(conf.usesecure === 'enable') {
-    cse.mqttport = '20517';
+    cse.mqttport = '8883';
 }
 
 conf.cse = cse;
